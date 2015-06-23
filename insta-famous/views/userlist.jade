@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1.
+    User List
+  ul
+    each user, i in userList
+      li 
+        p Type: #{user.type}
+        a(href="mailto#{user.email}")=user.username
+  

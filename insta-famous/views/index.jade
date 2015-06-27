@@ -2,13 +2,27 @@ extends layout
 
 block content
   h1.
-   Welcome to  #{title}
+   Welcome to #{title}
   #wrapper 
     #userList
       table
         thead
           th Picture
           th Username
-          th User-Type
+          th Price
+          th Contact
+          th Target Audience
+          th Delete?
         tbody
+
+    h2 Add User
+    #addUser
+      fieldset
+        input#inputUserName(type='text', placeholder='Username')
+        br
+        input#inputUserType(type='text', placeholder='User Type')
+        br
+        button#btnAddUser Add User 
+        br
+        button#instaButton Login Instagram
   

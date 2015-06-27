@@ -7,12 +7,15 @@ var bodyParser = require('body-parser');
 
 var mongo = require('mongodb');
 var monk = require('monk');
-var db = monk('localhost:27017/instadb')
+var db = monk('localhost:27017/instadb');
+
+//var api = require('instagram-node').instagram();
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -34,6 +37,49 @@ app.use(function(req,res,next){
 
 app.use('/', routes);
 app.use('/users', users);
+
+app.use(express.static(__dirname + '/node_modules/jquery/dist/'));
+
+//INSTAGRAM AUTHENTICATION==============================================================
+/*
+api.use({
+  client_id: "3368cd2a15ec494383b2d21d0a28ff60",
+  client_secret: "6cf80d749cf1474089d4908ca26b3dcd"
+});
+
+var redirect_uri = 'http://localhost:3000/';
+
+
+exports.authorize_user = function(req, res) {
+  res.redirect(api.get_authorization_url(redirect_uri, { scope: ['likes'], state: 'a state' }));
+};
+
+exports.handleauth = function(req, res) {
+  api.authorize_user(req.query.code, redirect_uri, function(err, result) {
+    if (err) {
+      console.log(err.body);
+      res.send("Didn't work");
+    } else {
+      console.log('Yay! Access token is ' + result.access_token);
+      res.send('You made it!!');
+    }
+  });
+};
+
+// This is where you would initially send users to authorize 
+app.get('/authorize_user', exports.authorize_user);
+// This is your redirect URI 
+app.get('/handleauth', exports.handleauth);
+
+/*
+http.createServer(app).listen(app.get('port'), function(){
+  console.log("Express server listening on port " + app.get('port'));
+});
+*/
+
+//========================================================================================
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

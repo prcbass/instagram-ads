@@ -78,8 +78,8 @@ function addUser(event){
 
 	if(errorCount === 0){
 		var newUser = {
-			"type" : $('#addUser fieldset input#inputUserType').val(),
-			"username" : $('#addUser fieldset input#inputUserName').val()
+			"instaid" : $('#addUser fieldset input#inputInstaID').val(),
+			"price" : $('#addUser fieldset input#inputUserPrice').val()
 		}
 
 

@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1.
+    Enter a price for #{title}
+
+  form(action='/adduser' method='post')
+    input(type='text' name='price' placeholder='Price')
+    br
+    input(type='submit' value="Submit")
+
+
+
+        
+        

@@ -2,8 +2,8 @@ extends layout
 
 block content
   h1.
-   Welcome to #{title}
-  #wrapper 
+    Welcome to #{title}
+  #wrapper
     #userList
       table
         thead
@@ -14,15 +14,28 @@ block content
           th Target Audience
           th Delete?
         tbody
+        each user, i in userlist
+          tr
+            td 
+              img(src = "#{imgURL}").profPic
+            td #{user.fullName}
+            td #{user.price}
+            td #{user.contact} #{user.username}
+            td #{user.targetAudience}
+            td
+              a(href="#" rel = "#{user._id}").linkdeleteuser Delete?
 
-    h2 Add User
+
+    h2 Add User 
+    script.
+      //Redirects user to authorize page so they can log-in to instagram 
+      var loginRedirect = function(){
+        window.location.href = "http://localhost:3000/authorize_user";
+      }
     #addUser
-      fieldset
-        input#inputInstaID(type='text', placeholder='Insta-ID')
-        br
-        input#inputUserPrice(type='text', placeholder='Price')
-        br
-        button#btnAddUser Add User 
-        br
-        button#instaButton Login Instagram
-  
+      button(onclick='loginRedirect()')#instaButton Login Instagram
+
+
+
+        
+        

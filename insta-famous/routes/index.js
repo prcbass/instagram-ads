@@ -30,10 +30,15 @@ router.post('/adduser', function(req,res){
 
   var instaID = req.app.get("instaID");
   var fullName = req.app.get("fullName");
+  var imgURL = req.app.get("imgSource")
+  var price = req.body.price;
+  console.log("VALUE OF PRICE: " + price + "\n");
+
   collection.insert({
     "instaID" : instaID,
     "fullName" : fullName,
-    "price" : req.price
+    "price" : price,
+    "imgURL" : imgURL
   }, function(err, result){
     if(err){
       //display error

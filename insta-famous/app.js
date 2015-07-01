@@ -18,9 +18,9 @@ var routes = require('./routes/index');
 
 var app = express();
 
-//Sets default picture for user
-var defaultSource = "http://naccrra.org/sites/default/files/default_site_pages/2013/instagram-icon.png";
-app.set('imgSource', defaultSource);
+//Sets default picture for user (this is being saved to database. Uncomment if default image needed)
+//var defaultSource = "http://naccrra.org/sites/default/files/default_site_pages/2013/instagram-icon.png";
+//app.set('imgSource', defaultSource);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

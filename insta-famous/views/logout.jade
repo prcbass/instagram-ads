@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  h1 You have now been logged out.
+
+  img(src="http://instagram.com/accounts/logout/" width="0" height="0")
+
+  script.
+      //Redirects user to authorize page so they can log-in to instagram 
+      //Will eventually redirect to /basicuser
+      var loginRedirect = function(){
+        window.location.href = "http://localhost:3000/home";
+      }
+
+  button(onclick='loginRedirect()')#logOutButton Go to home page
+
+
+
+        
+        

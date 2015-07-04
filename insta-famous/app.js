@@ -13,6 +13,10 @@ var db = monk('localhost:27017/test-api');
 //Instagram-API
 var api = require('instagram-node').instagram();
 
+//Cookie Manager
+//var oatmeal = require('oatmeal');
+var cookieParser = require('cookie-parser');
+
 var routes = require('./routes/index');
 //var users = require('./routes/users');
 
@@ -21,6 +25,10 @@ var app = express();
 //Sets default picture for user (this is being saved to database. Uncomment if default image needed)
 //var defaultSource = "http://naccrra.org/sites/default/files/default_site_pages/2013/instagram-icon.png";
 //app.set('imgSource', defaultSource);
+
+//Setting default cookie value as "logged out"
+app.use(cookieParser())
+//res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -40,9 +48,17 @@ app.use(function(req,res,next){
     next();
 });
 
+
 app.use('/', routes);
 //app.use('/users', users);
 
+
+/*
+app.use(function(req,res,next){
+  res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
+  next();
+});
+*/
 
 //INSTAGRAM AUTHENTICATION---------------------------------------------------------------------
 
@@ -56,6 +72,7 @@ var redirect_uri = 'http://localhost:3000/handleauth';
 
 exports.authorize_user = function(req, res) {
   res.redirect(api.get_authorization_url(redirect_uri, { scope: ['likes+relationships'], state: 'a state' }));
+  res.cookie('logstatus', 1, { maxAge: (30*60*1000)});
 };
   
  
@@ -63,9 +80,14 @@ exports.handleauth = function(req, res) {
   api.authorize_user(req.query.code, redirect_uri, function(err, result) {
     if (err) {
       console.log(err.body);
+      //SETTING COOKIE TO 0 since log in failed
+      res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
       res.send("Didn't work");
     } else {
       console.log('Yay! Access token is ' + result.access_token);
+
+      //COOKIE TO KNOW IF USER IS LOGGED IN
+      res.cookie('logstatus', 2, { maxAge: (30*60*1000)});
 
       app.set('instaID', result.user.id.toString());
       app.set('fullName', result.user.full_name);
@@ -87,7 +109,7 @@ exports.renderUser = function(req, res){
     }
     app.set('imgSource', result.profile_picture);
     console.log("WAITING FOR REDIRECT\n");
-    res.redirect("/adduser");
+    res.redirect("/basicuser");
   });
 };
 
@@ -96,6 +118,8 @@ app.get('/handleauth', exports.handleauth);
 app.get('/render_user', exports.renderUser);
 
 //----------------------------------------------------------------------------------------------
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

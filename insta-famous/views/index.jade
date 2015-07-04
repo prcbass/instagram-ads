@@ -4,6 +4,11 @@ block content
   h1.
     Welcome to #{title}
   #wrapper
+    script.
+      var logoutRedirect = function(){
+        window.location.href = "http://localhost:3000";
+      }
+    a(href="http://localhost:3000/logout").logOutLink Log Out
     #userList
       table
         thead
@@ -28,12 +33,14 @@ block content
 
     h2 Add User 
     script.
-      //Redirects user to authorize page so they can log-in to instagram 
-      var loginRedirect = function(){
-        window.location.href = "http://localhost:3000/authorize_user";
-      }
+      //Redirects to /adduser
+      var advertRedirect = function(){
+        window.location.href = "http://localhost:3000/adduser";
+      }  
     #addUser
-      button(onclick='loginRedirect()')#instaButton Login Instagram
+      button(onclick='advertRedirect()')#advertButton Click to Advertise
+
+    h2 #{loggedStatus}
 
 
 

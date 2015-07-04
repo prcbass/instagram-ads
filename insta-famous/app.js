@@ -26,9 +26,7 @@ var app = express();
 //var defaultSource = "http://naccrra.org/sites/default/files/default_site_pages/2013/instagram-icon.png";
 //app.set('imgSource', defaultSource);
 
-//Setting default cookie value as "logged out"
 app.use(cookieParser())
-//res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

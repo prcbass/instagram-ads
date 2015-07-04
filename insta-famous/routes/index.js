@@ -14,9 +14,7 @@ router.use(function(req,res,next){
     req.url = '/authorize_user'; 
   }
   else if(req.cookies.logstatus == 0){
-    //req.url === '/' && req.app.get('userStatus') !== 'loggedIn' 
     req.url = '/home';
-    //res.redirect('/home');
   }
   else{
     console.log("NORMAL ROUTING\n");
@@ -39,10 +37,8 @@ router.get('/', function(req, res){
   var source = req.app.get('imgSource');
   var loggedStatus = '';
 
-   //console.log("VALUE OF COOKIE INDEX: " , res.cookie("logStatus"));
-
   
-  if(req.cookies.logstatus == 1){
+  if(req.cookies.logstatus != 0){
     loggedStatus = "Basic User Logged In";
   }
 
@@ -96,12 +92,7 @@ router.all('/basicuser', function(req,res){
 
   });
 
-
-
-  //console.log("VALUE OF IDCOUNT 2: " , idCount);
-
   res.redirect('/');
-  //res.send("Success");
 
 });
 

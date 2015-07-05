@@ -14,7 +14,6 @@ var db = monk('localhost:27017/test-api');
 var api = require('instagram-node').instagram();
 
 //Cookie Manager
-//var oatmeal = require('oatmeal');
 var cookieParser = require('cookie-parser');
 
 var routes = require('./routes/index');
@@ -46,17 +45,11 @@ app.use(function(req,res,next){
     next();
 });
 
-
 app.use('/', routes);
 //app.use('/users', users);
 
+app.set('apiStatus', false);
 
-/*
-app.use(function(req,res,next){
-  res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
-  next();
-});
-*/
 
 //INSTAGRAM AUTHENTICATION---------------------------------------------------------------------
 
@@ -69,8 +62,8 @@ api.use({
 var redirect_uri = 'http://localhost:3000/handleauth';
 
 exports.authorize_user = function(req, res) {
+  //console.log("LONG URL: " , api.get_authorization_url(redirect_uri, { scope: ['likes+relationships'], state: 'a state' }));
   res.redirect(api.get_authorization_url(redirect_uri, { scope: ['likes+relationships'], state: 'a state' }));
-  res.cookie('logstatus', 1, { maxAge: (30*60*1000)});
 };
   
  
@@ -84,7 +77,8 @@ exports.handleauth = function(req, res) {
     } else {
       console.log('Yay! Access token is ' + result.access_token);
 
-      //COOKIE TO KNOW IF USER IS LOGGED IN
+      //COOKIES TO KNOW IF USER IS LOGGED IN
+      app.set('apiStatus', true);
       res.cookie('logstatus', 2, { maxAge: (30*60*1000)});
 
       app.set('instaID', result.user.id.toString());

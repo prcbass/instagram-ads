@@ -6,14 +6,27 @@ router.use(cookieParser());
 
 //Changes url so index becomes /home
 router.use(function(req,res,next){
+  var reqURL = req.url;
+  var urlLetter = reqURL.substr(reqURL.lastIndexOf('/') + 1).substr(0,2);
+  console.log("FIRST LETTER AFTER SLASH: " , urlLetter);
+  
   if(req.cookies.logstatus === undefined){
     res.cookie('logstatus', 0, {maxAge: (30*60*1000)});
   }
-  else if(req.url === '/authorize_user' /*&& req.cookies.logstatus == 1*/){
-    res.cookie('logstatus', 1, { maxAge: (30*60*1000)});
-    req.url = '/authorize_user'; 
+  else if(req.url === '/authorize_user'){
+    console.log("IN AUTHORIZE USER\n");
+    res.cookie('logstatus', 1, {maxAge: (30*60*1000)});
+  }
+  else if(urlLetter == "ha" && req.cookies.logstatus == 1){
+    console.log("IN HANDLEAUTH\n\n");
+  }
+    //user trying to go from log-in page to another page
+  else if(req.cookies.logstatus == 1 && req.app.get('apiStatus') == false){
+    console.log("CAN'T GET AROUND ME\n");
+    req.url = '/home';
   }
   else if(req.cookies.logstatus == 0){
+    console.log("GOING BACK HOME\n");
     req.url = '/home';
   }
   else{
@@ -73,8 +86,8 @@ router.all('/basicuser', function(req,res){
     console.log("VALUE OF IDCOUNT: " , idCount);
 
     if(idCount == 0){
-    collection.insert({
-      "DBinstaID" : instaID
+      collection.insert({
+        "DBinstaID" : instaID
       }, function(err, result){
         if(err){
           //dispay error
@@ -82,17 +95,17 @@ router.all('/basicuser', function(req,res){
         }
 
         console.log("Success! Basic User Added");
+        res.redirect('/');
 
       });
 
     }
     else{
       console.log("User redirected but already in database");
+      res.redirect('/');
     }
 
   });
-
-  res.redirect('/');
 
 });
 
@@ -153,6 +166,8 @@ router.delete('/deleteuser/:id', function(req,res){
 /* GET logout route */
 router.get('/logout', function(req,res){
   res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
+  //res.cookie('apistatus', false, {maxAge: (30*60*1000)});
+  req.app.set('apiStatus', false);
   res.render('logout');
 })
 

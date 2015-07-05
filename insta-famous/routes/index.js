@@ -48,6 +48,7 @@ router.get('/', function(req, res){
   var db = req.db;
   var collection = db.get('advertcollection');
   var source = req.app.get('imgSource');
+  var instaID = req.app.get("instaID");
   var loggedStatus = '';
 
   
@@ -57,6 +58,7 @@ router.get('/', function(req, res){
 
   collection.find({},{},function(e,docs){
     res.render('index',{
+      "userID"  : instaID,
       "userlist" : docs,
       "imgURL" : source,
       "title": "Insta-Famous",
@@ -144,6 +146,20 @@ router.post('/adduser', function(req,res){
   });
 });
 
+/* GET User page, specific to user via instaid */
+router.get('/userpage/:id', function(req,res){
+  console.log("IN USER PAGE ROUTE");
+
+  var fullName = req.app.get("fullName");
+  var imgURL = req.app.get("imgSource")
+
+  res.render('userpage', {
+    "userName" : fullName,
+    "imgURL" : imgURL
+  });
+
+});
+
 
 /* DELETE User via their mongodb id*/
 router.delete('/deleteuser/:id', function(req,res){
@@ -158,7 +174,7 @@ router.delete('/deleteuser/:id', function(req,res){
     }
     else{
       console.log("REDIRECTING");
-      res.send('/');
+      res.redirect('/');
     }
   });
 });
@@ -169,7 +185,7 @@ router.get('/logout', function(req,res){
   //res.cookie('apistatus', false, {maxAge: (30*60*1000)});
   req.app.set('apiStatus', false);
   res.render('logout');
-})
+});
 
 
 module.exports = router;

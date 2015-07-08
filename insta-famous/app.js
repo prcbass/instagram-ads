@@ -2,8 +2,9 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var session = require('express-session');
 
 //Mongo Database
 var mongo = require('mongodb');
@@ -16,16 +17,14 @@ var api = require('instagram-node').instagram();
 //Cookie Manager
 var cookieParser = require('cookie-parser');
 
+//Passport
+var passport = require('passport');
+var InstagramStrategy = require('passport-instagram').Strategy;
+
 var routes = require('./routes/index');
 //var users = require('./routes/users');
 
 var app = express();
-
-//Sets default picture for user (this is being saved to database. Uncomment if default image needed)
-//var defaultSource = "http://naccrra.org/sites/default/files/default_site_pages/2013/instagram-icon.png";
-//app.set('imgSource', defaultSource);
-
-app.use(cookieParser())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -37,6 +36,10 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(methodOverride());
+app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Make our db accessible to our router
@@ -48,66 +51,34 @@ app.use(function(req,res,next){
 app.use('/', routes);
 //app.use('/users', users);
 
-app.set('apiStatus', false);
-
-
 //INSTAGRAM AUTHENTICATION---------------------------------------------------------------------
+var INSTAGRAM_CLIENT_ID = "3368cd2a15ec494383b2d21d0a28ff60"
+var INSTAGRAM_CLIENT_SECRET = "6cf80d749cf1474089d4908ca26b3dcd"
+//access_token: "280430135.3368cd2.5b0f100ef30e43d8a23825f5637ef38c"
 
-api.use({
-  client_id: "3368cd2a15ec494383b2d21d0a28ff60",
-  client_secret: "6cf80d749cf1474089d4908ca26b3dcd"
-  //access_token: "280430135.3368cd2.5b0f100ef30e43d8a23825f5637ef38c"
+passport.serializeUser(function(user,done){
+  done(null,user);
 });
-  
-var redirect_uri = 'http://localhost:3000/handleauth';
 
-exports.authorize_user = function(req, res) {
-  //console.log("LONG URL: " , api.get_authorization_url(redirect_uri, { scope: ['likes+relationships'], state: 'a state' }));
-  res.redirect(api.get_authorization_url(redirect_uri, { scope: ['likes+relationships'], state: 'a state' }));
-};
-  
- 
-exports.handleauth = function(req, res) {
-  api.authorize_user(req.query.code, redirect_uri, function(err, result) {
-    if (err) {
-      console.log(err.body);
-      //SETTING COOKIE TO 0 since log in failed
-      res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
-      res.send("Didn't work");
-    } else {
-      console.log('Yay! Access token is ' + result.access_token);
+passport.deserializeUser(function(obj,done){
+  done(null,obj);
+});
 
-      //COOKIES TO KNOW IF USER IS LOGGED IN
-      app.set('apiStatus', true);
-      res.cookie('logstatus', 2, { maxAge: (30*60*1000)});
+passport.use(new InstagramStrategy({
+  clientID: INSTAGRAM_CLIENT_ID,
+  clientSecret: INSTAGRAM_CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/handleauth'
+},
+function(accessToken, refreshToken, profile, done){
+  process.nextTick(function(){
+    app.set('instaID', profile.id.toString());
+    app.set('fullName', profile.displayName);
+    app.set('imgSource', profile._json.data.profile_picture);
 
-      app.set('instaID', result.user.id.toString());
-      app.set('fullName', result.user.full_name);
-      res.redirect('/render_user');
-    }
+    return done(null,profile.id);
   });
-};
-
-exports.renderUser = function(req, res){
-  console.log("STARTING RENDERING");
-
-  //var userID = "280430135";
-  console.log("USER ID: " + app.get('instaID'));
-  console.log("FULL NAME: " + app.get('fullName') + "\n");
-
-  api.user(app.get('instaID'), function(err, result, remaining, limit){
-    if(err){
-      console.log("current user " + err);
-    }
-    app.set('imgSource', result.profile_picture);
-    console.log("WAITING FOR REDIRECT\n");
-    res.redirect("/basicuser");
-  });
-};
-
-app.get('/authorize_user', exports.authorize_user);
-app.get('/handleauth', exports.handleauth); 
-app.get('/render_user', exports.renderUser);
+}
+));
 
 //----------------------------------------------------------------------------------------------
 

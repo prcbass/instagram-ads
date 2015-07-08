@@ -1,50 +1,44 @@
 var express = require('express');
 var cookieParser = require('cookie-parser');
+var passport = require('passport');
 var router = express.Router();
 
 router.use(cookieParser());
 
-//Changes url so index becomes /home
-router.use(function(req,res,next){
-  var reqURL = req.url;
-  var urlLetter = reqURL.substr(reqURL.lastIndexOf('/') + 1).substr(0,2);
-  console.log("FIRST LETTER AFTER SLASH: " , urlLetter);
-  
-  if(req.cookies.logstatus === undefined){
-    res.cookie('logstatus', 0, {maxAge: (30*60*1000)});
+function ensureAuthenticated(req,res,next){
+  if(req.isAuthenticated()){
+    console.log("USER IS AUTHENTICATED");
+    return next();
   }
-  else if(req.url === '/authorize_user'){
-    console.log("IN AUTHORIZE USER\n");
-    res.cookie('logstatus', 1, {maxAge: (30*60*1000)});
-  }
-  else if(urlLetter == "ha" && req.cookies.logstatus == 1){
-    console.log("IN HANDLEAUTH\n\n");
-  }
-    //user trying to go from log-in page to another page
-  else if(req.cookies.logstatus == 1 && req.app.get('apiStatus') == false){
-    console.log("CAN'T GET AROUND ME\n");
-    req.url = '/home';
-  }
-  else if(req.cookies.logstatus == 0){
-    console.log("GOING BACK HOME\n");
-    req.url = '/home';
-  }
-  else{
-    console.log("NORMAL ROUTING\n");
-  }
+  console.log("USER IS NOT AUTHENTICATED");
+  res.redirect('/home');
+}
 
-  console.log("BOOL OF COOKIE: ", (req.cookies.logstatus==0));
-  next();
-});
+router.get('/authorize_user', 
+  passport.authenticate('instagram'),
+  function(req,res){
+
+  });
+
+router.get('/handleauth',
+  passport.authenticate('instagram', {failureRedirect: '/home'}),
+  function(req,res){
+    res.redirect('/basicuser');
+  });
+
 
 router.get('/home', function(req,res){
-  console.log("VALUE OF COOKIE HOME: \n" , req.cookies.logstatus);
   res.render('home');
+});
+
+router.use(function(req,res,next){
+  ensureAuthenticated(req,res,next);
 });
 
 
 /* GET index page. */
 router.get('/', function(req, res){
+
   var db = req.db;
   var collection = db.get('advertcollection');
   var source = req.app.get('imgSource');
@@ -52,7 +46,7 @@ router.get('/', function(req, res){
   var loggedStatus = '';
 
   
-  if(req.cookies.logstatus != 0){
+  if(req.isAuthenticated()){
     loggedStatus = "Basic User Logged In";
   }
 
@@ -113,6 +107,7 @@ router.all('/basicuser', function(req,res){
 
 /* GET adduser form page */
 router.get('/adduser', function(req,res){
+
   res.render('adduser', {"title": "Insta-Famous"});
 });
 
@@ -174,16 +169,14 @@ router.delete('/deleteuser/:id', function(req,res){
     }
     else{
       console.log("REDIRECTING");
-      res.redirect('/');
+      res.end();
     }
   });
 });
 
 /* GET logout route */
 router.get('/logout', function(req,res){
-  res.cookie('logstatus', 0, { maxAge: (30*60*1000)});
-  //res.cookie('apistatus', false, {maxAge: (30*60*1000)});
-  req.app.set('apiStatus', false);
+  req.logout();
   res.render('logout');
 });
 

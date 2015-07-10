@@ -1,0 +1,51 @@
+extends layout
+
+block content
+  h1 Welcome to #{userName}'s advertiser page
+
+  img(src = "#{imgURL}")
+
+  script.
+    var confirmEdit = function(){
+      alert("Advertiser profile setting changed! Come back to this page to change again ");
+
+      document.forms["submitEdits"].submit();
+    }
+
+  form(action='/adduser' id="submitEdits" method='post')
+    input(type='text' name='price' value='#{price}')
+    br
+    input(type='text', name='contact' value='#{contactEmail}')
+    br
+    p Target Audiences:
+    -var count = 0;
+    each audience in targetAudience
+      each type in selectedTypes
+        if type == audience 
+          - count++;
+      if count == 1
+        input(type="checkbox", name= "#{audience}", checked)
+        | #{audience} 
+        br
+        - count = 0;
+      else
+        input(type="checkbox", name= "#{audience}")
+        | #{audience} 
+        br
+        - count = 0;
+
+    button(onclick="confirmEdit()") Submit Changes
+
+  script.
+      //Redirects user to authorize page so they can log-in to instagram 
+      //Will eventually redirect to /basicuser
+      var indexRedirect = function(){
+        window.location.href = "http://localhost:3000/";
+      }
+
+  button(onclick='indexRedirect()')#indexRedirectButton Go to index
+
+
+
+        
+        

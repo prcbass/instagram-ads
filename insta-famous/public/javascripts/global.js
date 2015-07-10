@@ -26,3 +26,4 @@ function deleteUser(event){
 		});
 	}
 };
+

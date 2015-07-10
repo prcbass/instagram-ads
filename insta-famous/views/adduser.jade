@@ -7,6 +7,13 @@ block content
   form(action='/adduser' method='post')
     input(type='text' name='price' placeholder='Price')
     br
+    input(type='text', name='contact' placeholder='Email to be contact at')
+    br
+    p Choose your target audience from the following:
+    each audience, i in targetAudience
+      input(type="checkbox", name= "#{audience}")
+      | #{audience} 
+      br
     input(type='submit' value="Submit")
 
 

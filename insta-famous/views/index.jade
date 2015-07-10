@@ -32,14 +32,17 @@ block content
               a(href="#" rel = "#{user._id}").linkdeleteuser Delete?
 
 
-    h2 Add User 
     script.
       //Redirects to /adduser
       var advertRedirect = function(){
         window.location.href = "http://localhost:3000/adduser";
       }  
     #addUser
-      button(onclick='advertRedirect()')#advertButton Click to Advertise
+      if jUserType == "basic" 
+        button(onclick='advertRedirect()')#advertButton Click to Advertise
+      else
+        a(href="#" rel = "").buttonRevertUser Click to become a basic user (needs to be fixed) 
+
 
     h2 #{loggedStatus}
 

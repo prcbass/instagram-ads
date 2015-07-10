@@ -80,6 +80,9 @@ function(accessToken, refreshToken, profile, done){
 }
 ));
 
+var audienceTypes = ["AUTOMOTIVE", "ELECTRONICS", "SPORTS", "MISC"];
+app.set("audienceArr", audienceTypes);
+
 //----------------------------------------------------------------------------------------------
 
 

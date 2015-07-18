@@ -5,6 +5,8 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var session = require('express-session');
+//var fs = require('fs');
+var multer = require('multer');
 
 //Mongo Database
 var mongo = require('mongodb');
@@ -16,6 +18,9 @@ var api = require('instagram-node').instagram();
 
 //Cookie Manager
 var cookieParser = require('cookie-parser');
+
+//Grid
+//var Grid = require('gridfs-stream');
 
 //Passport
 var passport = require('passport');
@@ -41,6 +46,7 @@ app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: true 
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Make our db accessible to our router
 app.use(function(req,res,next){

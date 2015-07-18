@@ -15,7 +15,7 @@ a {
 	position:relative;
 }
 
-.logOutLink{
+.rightLink{
 	float: right;
 }
 
@@ -80,3 +80,5 @@ fieldset {
 	border:0;
 	padding:0; margin:0;
 }
+
+

@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1.
+    Make a post!
+
+  form(action='/createpost' enctype='multipart/form-data' method='post' id="imgForm")
+    input(type='file' name='postImg' size = "60")
+    br
+    textarea(name="postText" form="imgForm" placeholder="Enter your post text here...")
+    br
+    input(type='submit' value="Submit")
+
+  
+
+        
+        

@@ -9,9 +9,17 @@ block content
         window.location.href = "http://localhost:3000";
       }  
     a(href="http://localhost:3000/userpage/#{userID}" rel="#{userID}").userLink User Page
-    a(href="http://localhost:3000/logout").logOutLink Log Out
+    a(href="http://localhost:3000/logout").rightLink Log Out
+    br
+    a(href="http://localhost:3000/createpost").rightLink Create Post
+    form(action='/' method='post')
+      p Search by target audience (click "search" without selections to reset search) 
+      each audience, i in tAudience
+        input(type="checkbox", name= "#{audience}")
+        | #{audience} 
+      input(type='submit' value="Search")
     #userList
-      table
+      table(id="myTable" class="display")
         thead
           th Picture
           th Username

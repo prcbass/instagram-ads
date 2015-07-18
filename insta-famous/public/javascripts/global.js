@@ -1,9 +1,9 @@
 //DOM Ready ============================================================
 $(document).ready(function(){
 
-
 	//Add DELETE user button click
 	$('#userList table tbody').on('click', 'td a.linkdeleteuser', deleteUser);
+
 });
 
 //Functions ============================================================

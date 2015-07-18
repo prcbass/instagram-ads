@@ -1,7 +1,10 @@
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var passport = require('passport');
+var multer = require('multer');
 var router = express.Router();
+
+var upload = multer({dest:'uploads/'});
 
 router.use(cookieParser());
 
@@ -51,7 +54,8 @@ router.get('/', function(req, res){
   var loggedStatus = '';
   var jUserType = '';
 
-  
+  var tAudience = req.app.get("audienceArr");
+
   if(req.isAuthenticated()){
     collection.findOne({instaID:UinstaID},function(e,docs){
       if(e){
@@ -75,11 +79,72 @@ router.get('/', function(req, res){
           "title": "Insta-Famous",
           "loggedStatus" : loggedStatus,
           "jUserType" : jUserType,
-          "userID" : UinstaID
+          "userID" : UinstaID,
+          "tAudience" : tAudience
         });
+      });
+      
+    });
+  }
+});
+
+/* POST made when user searches from the index */
+router.post('/', function(req,res){
+  var db = req.db;
+  var collection = db.get('advertcollection');
+
+  var UinstaID = req.app.get("instaID");
+  var loggedStatus = '';
+  var jUserType = '';
+
+  var tAudience = req.app.get("audienceArr");
+  //Make array of selected search audiences 
+
+  var selectedTypes = [];
+
+  for(i=0; i < tAudience.length; i++){
+    if(req.body[tAudience[i]] == "on"){
+      selectedTypes.push(tAudience[i]);
+      console.log("ARRAY RESPONSE INDEX: ", selectedTypes);
+    }
+  }
+
+  if(selectedTypes.length == 0){
+    collection.find({userType : "advertiser"},{},function(e,docs){
+      res.render('index',{
+        "userlist" : docs,
+        "title": "Insta-Famous",
+        "loggedStatus" : loggedStatus,
+        "jUserType" : jUserType,
+        "userID" : UinstaID,
+        "tAudience" : tAudience
       });
     });
   }
+  //queries mongodb based on contents of selectedTypes **NEED TO CHANGE NAMES** 
+  else{
+
+    var query = {userType:"advertiser"};
+    query["$or"] = [];
+
+    for(i=0; i<selectedTypes.length; i++){
+      query["$or"].push({"targetAudience":selectedTypes[i]});
+    }
+
+    console.log("QUERY: ", query);
+
+    collection.find(query,{},function(e,docs){
+      res.render('index',{
+        "userlist" : docs,
+        "title": "Insta-Famous",
+        "loggedStatus" : loggedStatus,
+        "jUserType" : jUserType,
+        "userID" : UinstaID,
+        "tAudience" : tAudience
+      });
+    });
+  }
+
 });
 
 /* ADD Basic User instaid to database */
@@ -211,6 +276,41 @@ router.post('/adduser', function(req,res){
       res.redirect('/');
     }
   });
+});
+
+/*GET for create post page */
+router.get('/createpost', function(req,res){
+  res.render('createpost', {
+
+  });
+});
+
+var cpUpload = upload.single('postImg');
+
+/* POST for create post apge */
+router.post('/createpost', cpUpload, function(req,res){
+  var db = req.db;
+  var collection = db.get('postcollection');
+  var UinstaID = req.app.get("instaID")
+
+  console.log("\nPOST FORM BODY: %j", req.body);
+  console.log("\nPOST FROM FILE: %j", req.file.path);
+
+  collection.insert({
+      "instaID" : UinstaID,
+      "imgPath" : req.file.path,
+      "postText" : req.body.postText
+      }, function(err, result){
+        if(err){
+          //dispay error
+          res.send("Error: " + err);
+        }
+
+        console.log("Yay! User post created.");
+        res.redirect('/');
+
+      });
+
 });
 
 /* GET User page, specific to user via instaid */

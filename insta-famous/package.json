@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-  "prestart": "mongod --dbpath /Users/sebastianhernandez/Desktop/instagram-project/instagram-ads/insta-famous/data  --fork --logpath /dev/null",
+  "prestart": "mongod --fork --logpath /dev/null",
   "start": "node ./bin/www",
   "stop": "mongo admin --eval 'db.shutdownServer()' > /dev/null",
-  "pretest": "mongod --dbpath /Users/sebastianhernandez/Desktop/instagram-project/instagram-ads/insta-famous/data  --fork --logpath /dev/null",
+  "pretest": "mongod --fork --logpath /dev/null",
   "test": "mocha test",
   "posttest": "mongo admin --eval 'db.shutdownServer()' > /dev/null"
   },

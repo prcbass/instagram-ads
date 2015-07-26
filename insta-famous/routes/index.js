@@ -23,7 +23,7 @@ router.get('/home', function(req,res){
 after /home to check if user is authenticated */
 function ensureAuthenticated(req,res,next){
   if(req.isAuthenticated()){
-    console.log("USER IS AUTHENTICATED");
+    console.log("USER IS AUTHENTICATED OK");
     return next();
   }
   console.log("USER IS NOT AUTHENTICATED");

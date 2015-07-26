@@ -3,21 +3,20 @@ extends layout
 block content
   h1.
     Welcome to #{title}
-  #wrapper
-    script.
-      var logoutRedirect = function(){
-        window.location.href = "http://localhost:3000";
-      }  
+  #wrapper  
     a(href="http://localhost:3000/userpage/#{userID}" rel="#{userID}").userLink User Page
     a(href="http://localhost:3000/logout").rightLink Log Out
     br
     a(href="http://localhost:3000/createpost").rightLink Create Post
-    form(action='/' method='post')
+    br
+    a(href="http://localhost:3000/previousposts").rightLink Previous Posts
+    form(method='post')
       p Search by target audience (click "search" without selections to reset search) 
       each audience, i in tAudience
         input(type="checkbox", name= "#{audience}")
-        | #{audience} 
+        | #{audience}
       input(type='submit' value="Search")
+    h3 Choose advertisers to use!
     #userList
       table(id="myTable" class="display")
         thead
@@ -37,14 +36,7 @@ block content
             td #{user.contact} #{user.username}
             td #{user.targetAudience}
             td
-              a(href="#" rel = "#{user._id}").linkdeleteuser Delete?
-
-
-    script.
-      //Redirects to /adduser
-      var advertRedirect = function(){
-        window.location.href = "http://localhost:3000/adduser";
-      }  
+              a(href="#" rel = "#{user._id}").linkdeleteuser Delete?  
     #addUser
       if jUserType == "basic" 
         button(onclick='advertRedirect()')#advertButton Click to Advertise

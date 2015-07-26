@@ -1,0 +1,40 @@
+extends layout
+
+block content
+  h3 Choose advertisers to use!
+  form(method='post')
+      p Search by target audience (click "search" without selections to reset search) 
+      each audience, i in tAudience
+        input(type="checkbox", name= "#{audience}")
+        | #{audience}
+      input(type='submit' value="Search")
+  #userList
+    table
+      thead
+        th 
+        th Picture
+        th Username
+        th Price
+        th Contact
+        th Target Audience
+      tbody
+      each user, i in userlist
+        tr
+          td 
+            input(type="checkbox", name= "#{user.instaID}").advertiserCheck
+          td 
+            img(src = "#{user.imgURL}").profPic
+          td #{user.fullName}
+          td #{user.price}
+          td #{user.contact} #{user.username}
+          td #{user.targetAudience}
+    button()#advertiserInput Submit Advertiser Choices 
+
+
+
+  
+
+  
+
+        
+        

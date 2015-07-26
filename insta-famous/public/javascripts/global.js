@@ -4,6 +4,8 @@ $(document).ready(function(){
 	//Add DELETE user button click
 	$('#userList table tbody').on('click', 'td a.linkdeleteuser', deleteUser);
 
+	//Add POST for checking which advertiser is selected
+	$('#advertiserInput').click(checkPostAdvertisers);
 });
 
 //Functions ============================================================
@@ -25,5 +27,31 @@ function deleteUser(event){
 			}
 		});
 	}
+};
+
+function checkPostAdvertisers(event){
+	event.preventDefault();
+
+	var checkedAds = new Array();
+	$(".advertiserCheck:checkbox:checked").each(function(){
+		checkedAds.push($(this).attr("name"));
+	})
+	console.log("VALUE OF ARRAY: ", checkedAds);
+
+	var selectedChecks = JSON.stringify(checkedAds);
+
+	$.ajax({
+		type: 'POST',
+		dataType: "json",
+		data: {result:selectedChecks},
+		url: '/postadvertisers'
+	}).done(function(response){
+		if(response.msg != ''){
+			//good to go
+		}
+		else{
+			alert('Error: ' + response.msg);
+		}
+	});
 };
 

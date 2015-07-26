@@ -5,13 +5,17 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var session = require('express-session');
-//var fs = require('fs');
+var fs = require('fs');
 var multer = require('multer');
 
 //Mongo Database
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/test-api');
+
+
+//var mongoose = require('mongoose');
+//mongoose.connect('mongodb://localhost:27017/test-api');
 
 //Instagram-API
 var api = require('instagram-node').instagram();
@@ -20,7 +24,7 @@ var api = require('instagram-node').instagram();
 var cookieParser = require('cookie-parser');
 
 //Grid
-//var Grid = require('gridfs-stream');
+var Grid = require('gridfs-stream');
 
 //Passport
 var passport = require('passport');
@@ -86,8 +90,12 @@ function(accessToken, refreshToken, profile, done){
 }
 ));
 
+//global variable holding current audience types
 var audienceTypes = ["AUTOMOTIVE", "ELECTRONICS", "SPORTS", "MISC"];
 app.set("audienceArr", audienceTypes);
+
+//global variable holding mongoDB ObjectId of most recently created post
+app.set("recentPostID", 0);
 
 //----------------------------------------------------------------------------------------------
 

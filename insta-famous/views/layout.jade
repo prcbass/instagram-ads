@@ -7,3 +7,17 @@ html
     block content
     script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
     script(src='/javascripts/global.js')
+    script.
+      //Redirects user to authorize page so they can log-in to instagram 
+      var indexRedirect = function(){
+        window.location.href = "http://localhost:3000/";
+      }
+    script.
+      var logoutRedirect = function(){
+        window.location.href = "http://localhost:3000";
+      }
+    script.
+      //Redirects to /adduser
+      var advertRedirect = function(){
+        window.location.href = "http://localhost:3000/adduser";
+      }

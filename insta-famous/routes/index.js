@@ -1,12 +1,23 @@
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var passport = require('passport');
+var fs = require('fs');
+var Grid = require('gridfs-stream');
 var multer = require('multer');
+var mongo = require('mongodb');
 var router = express.Router();
+
+//var ObjectId = require('mongodb').ObjectId
 
 var upload = multer({dest:'uploads/'});
 
+//Not sure if needed atm
 router.use(cookieParser());
+
+/* GET HOME PAGE */
+router.get('/home', function(req,res){
+  res.render('home');
+});
 
 /* General function that is run at the beginning of every request 
 after /home to check if user is authenticated */
@@ -32,11 +43,6 @@ router.get('/handleauth',
   function(req,res){
     res.redirect('/basicuser');
   });
-
-/* GET HOME PAGE */
-router.get('/home', function(req,res){
-  res.render('home');
-});
 
 /* SEE function above */
 router.use(function(req,res,next){
@@ -144,7 +150,92 @@ router.post('/', function(req,res){
       });
     });
   }
+});
 
+/* GET for page where user chooses advertisers */
+router.get('/chooseadvertisers', function(req,res){
+  var db = req.db;
+  var collection = db.get('advertcollection');
+  var tAudience = req.app.get("audienceArr");
+
+  collection.find({userType : "advertiser"},{},function(e,docs){
+    res.render('chooseadvertisers',{
+      "userlist" : docs,
+      "tAudience" : tAudience
+    });
+  });
+});
+
+/* POST for getting which advertisers are associated with a post */
+router.post('/postadvertisers', function(req,res){
+  console.log(req.body.result);
+
+  var selectedAdvertisers = req.body.result;
+
+  var db = req.db;
+
+  //collection for creator
+  var collection = db.get('postcollection');
+
+  //get ObjectId of post entry in db to use in advertiser collection
+  //collection.find()
+
+  //collection for advertisers
+
+  //collection for posts
+  res.redirect('/chooseadvertisers');
+});
+
+
+/* POST for chooseadvertisers, simply allows for searching of target audience in chooseadvertiser route*/
+router.post('/chooseadvertisers',function(req,res){
+  var db = req.db;
+  var collection = db.get('advertcollection');
+
+  var UinstaID = req.app.get("instaID");
+  var loggedStatus = '';
+  var jUserType = '';
+
+  var tAudience = req.app.get("audienceArr");
+  //Make array of selected search audiences 
+
+  var selectedTypes = [];
+
+  for(i=0; i < tAudience.length; i++){
+    if(req.body[tAudience[i]] == "on"){
+      selectedTypes.push(tAudience[i]);
+      console.log("ARRAY RESPONSE INDEX: ", selectedTypes);
+    }
+  }
+
+  if(selectedTypes.length == 0){
+    collection.find({userType : "advertiser"},{},function(e,docs){
+      res.render('chooseadvertisers',{
+        "userlist" : docs,
+        "tAudience" : tAudience
+      });
+    });
+  }
+  //queries mongodb based on contents of selectedTypes
+  else{
+
+    //Dynamic queries 
+    var query = {userType:"advertiser"};
+    query["$or"] = [];
+
+    for(i=0; i<selectedTypes.length; i++){
+      query["$or"].push({"targetAudience":selectedTypes[i]});
+    }
+
+    console.log("QUERY: ", query);
+
+    collection.find(query,{},function(e,docs){
+      res.render('chooseadvertisers',{
+        "userlist" : docs,
+        "tAudience" : tAudience
+      });
+    });
+  }
 });
 
 /* ADD Basic User instaid to database */
@@ -174,10 +265,7 @@ router.all('/basicuser', function(req,res){
         "userType" : "basic",
         "instaID" : UinstaID,
         "fullName" : fullName,
-        "price" : null,
-        "imgURL" : imgURL,
-        "contact" : null,
-        "targetAudience" : null
+        "imgURL" : imgURL
       }, function(err, result){
         if(err){
           //dispay error
@@ -280,26 +368,33 @@ router.post('/adduser', function(req,res){
 
 /*GET for create post page */
 router.get('/createpost', function(req,res){
-  res.render('createpost', {
-
-  });
+  res.render('createpost');
 });
 
 var cpUpload = upload.single('postImg');
 
-/* POST for create post apge */
-router.post('/createpost', cpUpload, function(req,res){
+/* POST for create post page NOTE: storepost used to prevent name conflict */
+router.post('/storepost', cpUpload, function(req,res){
   var db = req.db;
   var collection = db.get('postcollection');
-  var UinstaID = req.app.get("instaID")
-
-  console.log("\nPOST FORM BODY: %j", req.body);
+  var UinstaID = req.app.get("instaID");
+  
+  console.log("\nPOST FROM BODY: %j", req.body);
   console.log("\nPOST FROM FILE: %j", req.file.path);
 
-  collection.insert({
-      "instaID" : UinstaID,
-      "imgPath" : req.file.path,
-      "postText" : req.body.postText
+  var tmp_path = req.file.path;
+  var target_path = './public/images/' + req.file.originalname;
+
+  fs.rename(tmp_path, target_path, function(err){
+    if(err){
+      throw err;
+    }
+    fs.unlink(tmp_path, function(){
+      console.log("NEW POST ID", collection.id());
+      collection.insert({
+        "instaID" : UinstaID,
+        "imgName" : req.file.originalname,
+        "postText" : req.body.postText
       }, function(err, result){
         if(err){
           //dispay error
@@ -307,10 +402,14 @@ router.post('/createpost', cpUpload, function(req,res){
         }
 
         console.log("Yay! User post created.");
-        res.redirect('/');
+        res.redirect('/chooseadvertisers');
 
       });
 
+      collection.findOne({})
+
+    });
+  });
 });
 
 /* GET User page, specific to user via instaid */
@@ -345,6 +444,34 @@ router.get('/userpage/:id', function(req,res){
     }
   });
 
+});
+
+/* GET PREVIOUS POSTS ROUTE */
+router.get('/previousposts', function(req,res){
+  var db = req.db;
+  var collection = db.get('postcollection');
+  var UinstaID = req.app.get("instaID");
+
+  collection.find({instaID:UinstaID},{}, function(e,docs){
+    if(e){
+      console.log("Error: ", e);
+      res.send(e);
+    }
+    if(docs.length != 0){
+      console.log("\nFOUND POSTS")
+      res.render('previousposts',{
+        "postcollection" : docs,
+        "postStatus" : " "
+      });
+    }
+    else{
+      console.log("\nNO POSTS");
+      res.render('previousposts',{
+        "postcollection" : 0,
+        "postStatus" : "Oops, no posts made"
+      });
+    }
+  });
 });
 
 

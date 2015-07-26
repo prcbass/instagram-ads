@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  h1.
+    Previous Posts!
+  
+  p #{postStatus}
+  #userList
+    table
+      thead
+        th Picture
+        th Description
+        th Linked Advertisers
+      tbody
+        each post, i in postcollection
+          tr
+            td
+              img(src = "http://localhost:3000/images/#{post.imgName}").profPic
+            td #{post.postText}
+            td Needs to be fixed
+
+  script.
+      //Redirects user to authorize page so they can log-in to instagram 
+      //Will eventually redirect to /basicuser
+      var indexRedirect = function(){
+        window.location.href = "http://localhost:3000/";
+      }
+
+  button(onclick='indexRedirect()')#indexRedirectButton Go to index
+
+  
+
+        
+        

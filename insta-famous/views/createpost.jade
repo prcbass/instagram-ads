@@ -4,12 +4,17 @@ block content
   h1.
     Make a post!
 
-  form(action='/createpost' enctype='multipart/form-data' method='post' id="imgForm")
+  form(action='/storepost' enctype='multipart/form-data' method='post' id="imgForm")
+    h3 Chose an image for your post!
     input(type='file' name='postImg' size = "60")
     br
-    textarea(name="postText" form="imgForm" placeholder="Enter your post text here...")
+    h3 Write a caption for your post!
+    textarea(name="postText" form="imgForm" placeholder="Enter your post text here..." rows="10" cols="50")
     br
-    input(type='submit' value="Submit")
+    input(type='submit' value='Submit')
+  button(onclick='indexRedirect()')#indexRedirectButton Go to index
+
+  
 
   
 

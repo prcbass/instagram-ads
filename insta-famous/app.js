@@ -11,7 +11,7 @@ var multer = require('multer');
 //Mongo Database
 var mongo = require('mongodb');
 var monk = require('monk');
-var db = monk('localhost:27017/test-api');
+var db = monk('toutloud.com:27017/test-api');
 
 
 //var mongoose = require('mongoose');
@@ -77,7 +77,7 @@ passport.deserializeUser(function(obj,done){
 passport.use(new InstagramStrategy({
   clientID: INSTAGRAM_CLIENT_ID,
   clientSecret: INSTAGRAM_CLIENT_SECRET,
-  callbackURL: 'http://localhost:3000/handleauth'
+  callbackURL: 'http://toutloud.com/handleauth'
 },
 function(accessToken, refreshToken, profile, done){
   process.nextTick(function(){

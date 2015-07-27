@@ -4,12 +4,12 @@ block content
   h1.
     Welcome to #{title}
   #wrapper  
-    a(href="http://localhost:3000/userpage/#{userID}" rel="#{userID}").userLink User Page
-    a(href="http://localhost:3000/logout").rightLink Log Out
+    a(href="/userpage/#{userID}" rel="#{userID}").userLink User Page
+    a(href="/logout").rightLink Log Out
     br
-    a(href="http://localhost:3000/createpost").rightLink Create Post
+    a(href="/createpost").rightLink Create Post
     br
-    a(href="http://localhost:3000/previousposts").rightLink Previous Posts
+    a(href="/previousposts").rightLink Previous Posts
     form(method='post')
       p Search by target audience (click "search" without selections to reset search) 
       each audience, i in tAudience

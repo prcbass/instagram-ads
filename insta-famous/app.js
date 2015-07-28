@@ -11,7 +11,7 @@ var multer = require('multer');
 //Mongo Database
 var mongo = require('mongodb');
 var monk = require('monk');
-var db = monk('toutloud.com:27017/test-api');
+var db;
 
 
 //var mongoose = require('mongoose');
@@ -35,6 +35,17 @@ var routes = require('./routes/index');
 
 var app = express();
 
+//changes db connection based on host
+app.use(function(req,res,next){
+  if(req.get('host') == 'localhost:3000'){
+    db = monk('localhost:27017/test-api');
+  }
+  else{
+    db = monk('toutloud.com:27017/test-api');
+  }
+  next();
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -51,44 +62,59 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 // Make our db accessible to our router
 app.use(function(req,res,next){
     req.db = db;
     next();
 });
 
+var INSTAGRAM_CLIENT_ID = "3368cd2a15ec494383b2d21d0a28ff60"
+var INSTAGRAM_CLIENT_SECRET = "6cf80d749cf1474089d4908ca26b3dcd"
+var callBackUrl;
+
+app.use(function(req,res, next){
+  if(req.get('host') == 'localhost:3000'){
+    callBackUrl = 'http://localhost:3000/handleauth'; 
+  }
+  else{
+    callBackUrl = 'http://toutloud.com/handleauth';
+  }
+  console.log('CALL BACK URL: ', callBackUrl);
+
+  passport.serializeUser(function(user,done){
+    done(null,user);
+  });
+
+  passport.deserializeUser(function(obj,done){
+    done(null,obj);
+  });
+
+  passport.use(new InstagramStrategy({
+    clientID: INSTAGRAM_CLIENT_ID,
+    clientSecret: INSTAGRAM_CLIENT_SECRET,
+    callbackURL: callBackUrl
+  },
+  function(accessToken, refreshToken, profile, done){
+    process.nextTick(function(){
+      app.set('instaID', profile.id.toString());
+      app.set('fullName', profile.displayName);
+      app.set('imgSource', profile._json.data.profile_picture);
+
+      return done(null,profile.id);
+    });
+  }));
+
+  next();
+});
+
+console.log("URL: ", callBackUrl)
+
 app.use('/', routes);
 //app.use('/users', users);
 
 //INSTAGRAM AUTHENTICATION---------------------------------------------------------------------
-var INSTAGRAM_CLIENT_ID = "3368cd2a15ec494383b2d21d0a28ff60"
-var INSTAGRAM_CLIENT_SECRET = "6cf80d749cf1474089d4908ca26b3dcd"
-//access_token: "280430135.3368cd2.5b0f100ef30e43d8a23825f5637ef38c"
 
-passport.serializeUser(function(user,done){
-  done(null,user);
-});
 
-passport.deserializeUser(function(obj,done){
-  done(null,obj);
-});
-
-passport.use(new InstagramStrategy({
-  clientID: INSTAGRAM_CLIENT_ID,
-  clientSecret: INSTAGRAM_CLIENT_SECRET,
-  callbackURL: 'http://toutloud.com/handleauth'
-},
-function(accessToken, refreshToken, profile, done){
-  process.nextTick(function(){
-    app.set('instaID', profile.id.toString());
-    app.set('fullName', profile.displayName);
-    app.set('imgSource', profile._json.data.profile_picture);
-
-    return done(null,profile.id);
-  });
-}
-));
 
 //global variable holding current audience types
 var audienceTypes = ["AUTOMOTIVE", "ELECTRONICS", "SPORTS", "MISC"];
